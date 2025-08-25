@@ -1,3 +1,4 @@
+// build.gradle.kts (Module: app) - UPDATED with Location Services
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -6,7 +7,6 @@ plugins {
     id("kotlin-parcelize")
     id("kotlinx-serialization")
     id("org.jetbrains.kotlin.plugin.compose")
-
 }
 
 android {
@@ -79,6 +79,11 @@ dependencies {
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+
+    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

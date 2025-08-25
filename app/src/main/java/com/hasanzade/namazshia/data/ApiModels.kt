@@ -10,12 +10,12 @@ data class PrayerTimesResponse(
 
 @Serializable
 data class PrayerTimeDto(
-    val timeSunrise: String,
-    val timeFajr: String,
-    val timeDhuhr: String,
-    val timeSunset: String,
-    val timeMaghrib: String,
-    val timeMidnight: String,
-    val date: String,
-    val dateReadable: String
+    val timeSunrise: String = "",
+    val timeFajr: String = "",
+    val timeDhuhr: String = "",
+    val timeSunset: String = "",
+    val timeMaghrib: String = "",
+    val timeMidnight: String = "",
+    val date: String = "",
+    val dateReadable: String = ""
 )

@@ -1,4 +1,4 @@
-package com.hasanzade.app
+package com.hasanzade.namazshia
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
