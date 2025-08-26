@@ -69,7 +69,6 @@ class LocationRepository @Inject constructor(
     }
 
     private fun getCityFromCoordinates(lat: Double, lng: Double): String {
-        // Basit city mapping - gerçek uygulamada Geocoder kullanılmalı
         return when {
             // Baku coordinates
             lat in 40.3..40.5 && lng in 49.8..50.0 -> "baku"

@@ -60,7 +60,7 @@ class PrayerTimesViewModel @Inject constructor(
 
     fun onLocationPermissionDenied() {
         _uiState.value = _uiState.value.copy(needsLocationPermission = false)
-        loadPrayerTimes("istanbul") // Default city
+        loadPrayerTimes("baku") // Default city
     }
 
     fun loadPrayerTimes(city: String = "istanbul") {

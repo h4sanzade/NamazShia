@@ -1,4 +1,3 @@
-// Navigation.kt - UPDATED with Fixed Bottom Bar
 package com.hasanzade.namazshia
 
 import androidx.compose.foundation.layout.Box

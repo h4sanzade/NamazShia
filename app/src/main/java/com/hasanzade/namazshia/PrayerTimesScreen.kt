@@ -1,4 +1,3 @@
-// PrayerTimesScreen.kt - UPDATED with Location Permission
 package com.hasanzade.namazshia
 
 import android.Manifest
