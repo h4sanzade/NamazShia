@@ -1,51 +1,55 @@
 package com.hasanzade.namazshia.domain
 
+import android.os.Build
 import android.util.Log
-import com.hasanzade.namazshia.data.PrayerApiService
+import com.hasanzade.namazshia.location.LocationData
+import com.hasanzade.namazshia.prayer.PrayerTimesCalculator
+import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
 interface PrayerRepository {
-    suspend fun getPrayerTimes(city: String): Result<PrayerTimes>
+    fun getPrayerTimes(locationData: LocationData, date: LocalDate = LocalDate.now()): Result<PrayerTimes>
+    fun getPrayerTimesForOffset(locationData: LocationData, dayOffset: Int): Result<PrayerTimes>
 }
 
 @Singleton
-class PrayerRepositoryImpl @Inject constructor(
-    private val apiService: PrayerApiService
-) : PrayerRepository {
+class PrayerRepositoryImpl @Inject constructor() : PrayerRepository {
 
-    override suspend fun getPrayerTimes(city: String): Result<PrayerTimes> {
+    private val calculator = PrayerTimesCalculator()
+
+    override fun getPrayerTimes(locationData: LocationData, date: LocalDate): Result<PrayerTimes> {
         return try {
-            Log.d("PrayerRepository", "Fetching prayer times for city: $city")
+            Log.d("PrayerRepository", "Calculating prayer times for: ${locationData.city} (${locationData.latitude}, ${locationData.longitude}) on $date")
 
-            val response = apiService.getPrayerTimes(city)
-            Log.d("PrayerRepository", "API Response: success=${response.success}, result size=${response.result.size}")
+            val result = calculator.calculatePrayerTimes(
+                latitude = locationData.latitude,
+                longitude = locationData.longitude,
+                date = date,
+                timezone = 4
+            )
 
-            if (response.success && response.result.isNotEmpty()) {
-                val dto = response.result.first()
-                Log.d("PrayerRepository", "First result DTO: $dto")
+            val prayerTimes = PrayerTimes(
+                fajr = result.fajr,
+                sunrise = result.sunrise,
+                dhuhr = result.dhuhr,
+                asr = result.asr,
+                maghrib = result.maghrib,
+                isha = result.isha,
+                date = result.date
+            )
 
-                val prayerTimes = PrayerTimes(
-                    fajr = dto.timeFajr,
-                    sunrise = dto.timeSunrise,
-                    dhuhr = dto.timeDhuhr,
-                    sunset = dto.timeSunset,
-                    maghrib = dto.timeMaghrib,
-                    midnight = dto.timeMidnight,
-                    date = dto.date,
-                    dateReadable = dto.dateReadable
-                )
+            Log.d("PrayerRepository", "Successfully calculated prayer times: $prayerTimes")
+            Result.success(prayerTimes)
 
-                Log.d("PrayerRepository", "Created PrayerTimes: $prayerTimes")
-                Result.success(prayerTimes)
-            } else {
-                val errorMsg = "No prayer times found. Success: ${response.success}, Results: ${response.result.size}"
-                Log.e("PrayerRepository", errorMsg)
-                Result.failure(Exception(errorMsg))
-            }
         } catch (e: Exception) {
-            Log.e("PrayerRepository", "Error fetching prayer times", e)
+            Log.e("PrayerRepository", "Error calculating prayer times", e)
             Result.failure(e)
         }
+    }
+
+    override fun getPrayerTimesForOffset(locationData: LocationData, dayOffset: Int): Result<PrayerTimes> {
+        val targetDate = LocalDate.now().plusDays(dayOffset.toLong())
+        return getPrayerTimes(locationData, targetDate)
     }
 }

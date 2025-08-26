@@ -74,7 +74,6 @@ fun PrayerTimesScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // Date Section with Islamic Green gradient
             DateSection(
                 dateInfo = uiState.dateInfo,
                 onPreviousDay = viewModel::navigateToPreviousDay,
@@ -199,7 +198,7 @@ fun LoadingSection() {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Loading prayer times...",
+                text = "Calculating prayer times...",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
             )
@@ -343,7 +342,7 @@ fun InformationalNote() {
                 modifier = Modifier.padding(end = 12.dp, top = 2.dp)
             )
             Text(
-                text = "Please wait about 4–5 minutes after the azan before starting your prayer.",
+                text = "Prayer times are calculated using precise astronomical algorithms based on your location. Wait about 4–5 minutes after the azan time before starting your prayer.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onTertiaryContainer
             )
@@ -381,7 +380,7 @@ fun ErrorMessage(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Error loading prayer times",
+                    text = "Error calculating prayer times",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.error
                 )
@@ -420,8 +419,8 @@ private fun getPrayerIcon(prayerName: String) = when (prayerName.lowercase()) {
     "fajr" -> Icons.Default.WbTwilight
     "sunrise" -> Icons.Default.WbSunny
     "dhuhr" -> Icons.Default.LightMode
-    "sunset" -> Icons.Default.Brightness3
-    "maghrib" -> Icons.Default.NightsStay
-    "midnight" -> Icons.Default.DarkMode
+    "asr" -> Icons.Default.Brightness6
+    "maghrib" -> Icons.Default.Brightness3
+    "isha" -> Icons.Default.NightsStay
     else -> Icons.Default.Schedule
 }

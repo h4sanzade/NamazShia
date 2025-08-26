@@ -72,11 +72,9 @@ class LocationRepository @Inject constructor(
         return when {
             // Baku coordinates
             lat in 40.3..40.5 && lng in 49.8..50.0 -> "baku"
-            // Istanbul coordinates
             lat in 40.9..41.1 && lng in 28.8..29.0 -> "istanbul"
-            // Ankara coordinates
             lat in 39.8..40.0 && lng in 32.7..32.9 -> "ankara"
-            else -> "istanbul" // Default
+            else -> "istanbul"
         }
     }
 }

@@ -6,15 +6,17 @@ import com.hasanzade.namazshia.domain.DateInfo
 import com.hasanzade.namazshia.domain.LocationInfo
 import com.hasanzade.namazshia.domain.PrayerRepository
 import com.hasanzade.namazshia.domain.PrayerTimes
+import com.hasanzade.namazshia.location.LocationData
 import com.hasanzade.namazshia.location.LocationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,6 +28,9 @@ class PrayerTimesViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PrayerTimesUiState())
     val uiState: StateFlow<PrayerTimesUiState> = _uiState.asStateFlow()
 
+    private var currentLocationData: LocationData? = null
+    private var currentDayOffset = 0
+
     init {
         checkLocationAndLoadPrayerTimes()
     }
@@ -35,7 +40,8 @@ class PrayerTimesViewModel @Inject constructor(
             if (locationRepository.hasLocationPermission()) {
                 val location = locationRepository.getCurrentLocation()
                 if (location != null) {
-                    loadPrayerTimes(location.city)
+                    currentLocationData = location
+                    loadPrayerTimes(location)
                     _uiState.value = _uiState.value.copy(
                         locationInfo = LocationInfo(
                             city = location.city.capitalize(),
@@ -44,8 +50,12 @@ class PrayerTimesViewModel @Inject constructor(
                         )
                     )
                 } else {
-                    // Fallback to default city
-                    loadPrayerTimes("istanbul")
+                    val defaultLocation = LocationData(40.4093, 49.8671, "baku")
+                    currentLocationData = defaultLocation
+                    loadPrayerTimes(defaultLocation)
+                    _uiState.value = _uiState.value.copy(
+                        locationInfo = LocationInfo("Baku", 40.4093, 49.8671)
+                    )
                 }
             } else {
                 _uiState.value = _uiState.value.copy(needsLocationPermission = true)
@@ -60,18 +70,23 @@ class PrayerTimesViewModel @Inject constructor(
 
     fun onLocationPermissionDenied() {
         _uiState.value = _uiState.value.copy(needsLocationPermission = false)
-        loadPrayerTimes("baku") // Default city
+        val defaultLocation = LocationData(40.4093, 49.8671, "baku")
+        currentLocationData = defaultLocation
+        loadPrayerTimes(defaultLocation)
+        _uiState.value = _uiState.value.copy(
+            locationInfo = LocationInfo("Baku", 40.4093, 49.8671)
+        )
     }
 
-    fun loadPrayerTimes(city: String = "istanbul") {
+    private fun loadPrayerTimes(locationData: LocationData) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
-            prayerRepository.getPrayerTimes(city).fold(
+            prayerRepository.getPrayerTimesForOffset(locationData, currentDayOffset).fold(
                 onSuccess = { prayerTimes ->
                     _uiState.value = _uiState.value.copy(
                         prayerTimes = prayerTimes,
-                        dateInfo = createDateInfo(prayerTimes),
+                        dateInfo = createDateInfo(currentDayOffset),
                         isLoading = false
                     )
                 },
@@ -85,49 +100,48 @@ class PrayerTimesViewModel @Inject constructor(
         }
     }
 
+    fun loadPrayerTimes() {
+        currentLocationData?.let { locationData ->
+            loadPrayerTimes(locationData)
+        }
+    }
+
     fun navigateToNextDay() {
-        val currentOffset = _uiState.value.dateInfo.dayOffset
-        updateDateOffset(currentOffset + 1)
+        currentDayOffset += 1
+        currentLocationData?.let { locationData ->
+            loadPrayerTimes(locationData)
+        }
     }
 
     fun navigateToPreviousDay() {
-        val currentOffset = _uiState.value.dateInfo.dayOffset
-        updateDateOffset(currentOffset - 1)
+        currentDayOffset -= 1
+        currentLocationData?.let { locationData ->
+            loadPrayerTimes(locationData)
+        }
     }
 
-    private fun updateDateOffset(offset: Int) {
-        val currentDateInfo = _uiState.value.dateInfo
-        val updatedDateInfo = currentDateInfo.copy(
-            dayOffset = offset,
-            gregorianDate = calculateGregorianDate(offset),
-            hijriDate = calculateHijriDate(offset)
-        )
-        _uiState.value = _uiState.value.copy(dateInfo = updatedDateInfo)
-    }
+    private fun createDateInfo(dayOffset: Int): DateInfo {
+        val targetDate = LocalDate.now().plusDays(dayOffset.toLong())
+        val gregorianFormatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy", Locale.getDefault())
 
-    private fun createDateInfo(prayerTimes: PrayerTimes): DateInfo {
         return DateInfo(
-            gregorianDate = prayerTimes.dateReadable.ifEmpty { calculateGregorianDate(0) },
-            hijriDate = "Rabi' I 2, 1447",
-            dayOffset = 0
+            gregorianDate = targetDate.format(gregorianFormatter),
+            hijriDate = calculateHijriDate(dayOffset),
+            dayOffset = dayOffset
         )
-    }
-
-    private fun calculateGregorianDate(offset: Int): String {
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.DAY_OF_YEAR, offset)
-        val formatter = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
-        return formatter.format(calendar.time)
     }
 
     private fun calculateHijriDate(offset: Int): String {
-        return "Rabi' I ${2 + offset}, 1447"
+
+        val baseDay = 15
+        val newDay = baseDay + offset
+        return "Rabi' al-Awwal $newDay, 1446"
     }
 }
 
 data class PrayerTimesUiState(
     val prayerTimes: PrayerTimes? = null,
-    val locationInfo: LocationInfo = LocationInfo("Istanbul"),
+    val locationInfo: LocationInfo = LocationInfo("Baku"),
     val dateInfo: DateInfo = DateInfo("", ""),
     val isLoading: Boolean = false,
     val error: String? = null,

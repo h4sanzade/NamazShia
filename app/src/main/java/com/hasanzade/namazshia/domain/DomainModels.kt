@@ -1,23 +1,31 @@
 package com.hasanzade.namazshia.domain
 
+import android.os.Build
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.*
+
 data class PrayerTimes(
-    val fajr: String,
-    val sunrise: String,
-    val dhuhr: String,
-    val sunset: String,
-    val maghrib: String,
-    val midnight: String,
-    val date: String,
-    val dateReadable: String
+    val fajr: LocalTime,
+    val sunrise: LocalTime,
+    val dhuhr: LocalTime,
+    val asr: LocalTime,
+    val maghrib: LocalTime,
+    val isha: LocalTime,
+    val date: LocalDate
 ) {
-    fun getAllPrayers(): List<Prayer> = listOf(
-        Prayer("Fajr", fajr),
-        Prayer("Sunrise", sunrise),
-        Prayer("Dhuhr", dhuhr),
-        Prayer("Sunset", sunset),
-        Prayer("Maghrib", maghrib),
-        Prayer("Midnight", midnight)
-    )
+    fun getAllPrayers(): List<Prayer> {
+        val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+        return listOf(
+            Prayer("Fajr", fajr.format(timeFormatter)),
+            Prayer("Sunrise", sunrise.format(timeFormatter)),
+            Prayer("Dhuhr", dhuhr.format(timeFormatter)),
+            Prayer("Asr", asr.format(timeFormatter)),
+            Prayer("Maghrib", maghrib.format(timeFormatter)),
+            Prayer("Isha", isha.format(timeFormatter))
+        )
+    }
 }
 
 data class Prayer(
@@ -27,8 +35,8 @@ data class Prayer(
 
 data class LocationInfo(
     val city: String,
-    val latitude: Double = 41.0082,  // Istanbul coordinates
-    val longitude: Double = 28.9784
+    val latitude: Double = 40.4093, // Baku coordinates
+    val longitude: Double = 49.8671
 )
 
 data class DateInfo(
