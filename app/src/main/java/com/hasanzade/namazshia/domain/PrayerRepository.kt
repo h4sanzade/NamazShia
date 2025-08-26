@@ -1,9 +1,8 @@
 package com.hasanzade.namazshia.domain
 
-import android.os.Build
 import android.util.Log
 import com.hasanzade.namazshia.location.LocationData
-import com.hasanzade.namazshia.prayer.PrayerTimesCalculator
+import com.hasanzade.namazshia.PrayerTimesCalculator
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton

@@ -1,4 +1,4 @@
-package com.hasanzade.namazshia.prayer
+package com.hasanzade.namazshia
 
 import java.time.*
 import kotlin.math.*
