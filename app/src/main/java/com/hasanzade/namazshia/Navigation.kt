@@ -44,7 +44,7 @@ fun NamazShiaNavigation() {
                 PrayerTimesScreen()
             }
             composable("pray") {
-                PlaceholderScreen(title = "Pray")
+                PrayScreen() // Updated to use the new PrayScreen
             }
             composable("learn") {
                 PlaceholderScreen(title = "Learn")
