@@ -4,8 +4,10 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -15,11 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.launch
 
 data class TasbeehPhase(
@@ -32,10 +36,15 @@ data class TasbeehPhase(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasbeehScreen(onBackClick: () -> Unit) {
-    var currentPhase by remember { mutableStateOf(0) }
-    var currentCount by remember { mutableStateOf(0) }
+    val context = LocalContext.current
+    val dataRepository = remember { com.hasanzade.namazshia.data.QazaDataRepository(context) }
+
+    // Load saved state
+    val savedState = remember { dataRepository.getTasbeehState() }
+    var currentPhase by remember { mutableStateOf(savedState.first) }
+    var currentCount by remember { mutableStateOf(savedState.second) }
     var showInfo by remember { mutableStateOf(false) }
-    var showCompletion by remember { mutableStateOf(false) }
+    var showCompletion by remember { mutableStateOf(savedState.third) }
 
     val phases = listOf(
         TasbeehPhase(
@@ -69,6 +78,7 @@ fun TasbeehScreen(onBackClick: () -> Unit) {
         currentPhase = 0
         currentCount = 0
         showCompletion = false
+        dataRepository.resetTasbeehData()
     }
 
     fun incrementCount() {
@@ -89,6 +99,9 @@ fun TasbeehScreen(onBackClick: () -> Unit) {
                 }
             }
         }
+
+        // Save current state
+        dataRepository.saveTasbeehState(currentPhase, currentCount, showCompletion)
 
         // Reset button animation
         kotlinx.coroutines.GlobalScope.launch {
@@ -379,17 +392,25 @@ fun CompletionMessage(onReset: () -> Unit) {
 
 @Composable
 fun InfoDialog(onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
         Card(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+                .fillMaxWidth(0.95f)
+                .fillMaxHeight(0.9f)
+                .padding(8.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF2D2D2D)),
             shape = RoundedCornerShape(16.dp)
         ) {
             Column(
-                modifier = Modifier.padding(24.dp)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp)
             ) {
+                // Header with close button
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -398,15 +419,17 @@ fun InfoDialog(onDismiss: () -> Unit) {
                     Text(
                         text = "Tasbeeh of Syeda Fatima (sa)",
                         color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
                     )
 
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Close",
-                            tint = Color.Gray
+                            tint = Color.Gray,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
@@ -433,7 +456,17 @@ fun InfoDialog(onDismiss: () -> Unit) {
                     content = "Reported in Sahih Muslim and other authentic sources. Imam Ali (as) said: 'Fatima (sa) used to recite this Tasbeeh after every prayer, and it was dearer to her than anything in the world.'"
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                InfoSection(
+                    title = "How to Practice",
+                    content = "• Start with Bismillah\n• Recite each phrase mindfully\n• Count using fingers or beads\n• Focus on the meaning while reciting\n• End with a short dua\n• Practice consistently after prayers"
+                )
+
+                InfoSection(
+                    title = "Best Times",
+                    content = "• After each of the five daily prayers\n• Before sleeping\n• During quiet moments of reflection\n• When feeling stressed or anxious\n• As part of morning and evening remembrance"
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
 
                 Button(
                     onClick = onDismiss,
@@ -442,8 +475,10 @@ fun InfoDialog(onDismiss: () -> Unit) {
                         containerColor = Color(0xFF4CAF50)
                     )
                 ) {
-                    Text("Close", color = Color.White)
+                    Text("Close", color = Color.White, fontSize = 16.sp)
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -451,20 +486,21 @@ fun InfoDialog(onDismiss: () -> Unit) {
 
 @Composable
 fun InfoSection(title: String, content: String) {
-    Column {
+    Column(
+        modifier = Modifier.padding(bottom = 16.dp)
+    ) {
         Text(
             text = title,
             color = Color(0xFF4CAF50),
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = content,
             color = Color.White,
             fontSize = 14.sp,
-            lineHeight = 20.sp
+            lineHeight = 18.sp
         )
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }

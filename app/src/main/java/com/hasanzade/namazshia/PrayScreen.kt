@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.sp
 fun PrayScreen() {
     var selectedPrayer by remember { mutableStateOf<Pair<String, Int>?>(null) }
     var showQiblaFinder by remember { mutableStateOf(false) }
+    var showTasbeeh by remember { mutableStateOf(false) }
+    var showQazaTracker by remember { mutableStateOf(false) }
 
     when {
         selectedPrayer != null -> {
@@ -35,6 +37,18 @@ fun PrayScreen() {
         showQiblaFinder -> {
             QiblaFinderScreen(
                 onBackClick = { showQiblaFinder = false }
+            )
+        }
+
+        showTasbeeh -> {
+            TasbeehScreen(
+                onBackClick = { showTasbeeh = false }
+            )
+        }
+
+        showQazaTracker -> {
+            QazaTrackerScreen(
+                onBackClick = { showQazaTracker = false }
             )
         }
 
@@ -64,7 +78,9 @@ fun PrayScreen() {
 
                 // Extra Menu Section
                 ExtraMenuCard(
-                    onQiblaFinderClick = { showQiblaFinder = true }
+                    onQiblaFinderClick = { showQiblaFinder = true },
+                    onTasbeehClick = { showTasbeeh = true },
+                    onQazaTrackerClick = { showQazaTracker = true }
                 )
 
                 // Bottom spacing for navigation bar
@@ -151,7 +167,8 @@ fun PrayerListItem(
 @Composable
 fun ExtraMenuCard(
     onQiblaFinderClick: () -> Unit = {},
-    onTasbeehClick: () -> Unit = {}
+    onTasbeehClick: () -> Unit = {},
+    onQazaTrackerClick: () -> Unit = {}
 ) {
     val menuItems = listOf(
         ExtraMenuItem(
@@ -163,14 +180,14 @@ fun ExtraMenuCard(
         ExtraMenuItem(
             title = "Tasbih of Lady Fatima (a)",
             subtitle = "Special kind of Dhikr",
-            icon = Icons.Default.FiberManualRecord,
+            icon = Icons.Default.RadioButtonChecked,
             onClick = onTasbeehClick
         ),
         ExtraMenuItem(
             title = "Qaza Tracker",
             subtitle = "Complete your missed prayers",
             icon = Icons.Default.Schedule,
-            onClick = { /* Handle qaza tracker click */ }
+            onClick = onQazaTrackerClick
         )
     )
 
