@@ -152,7 +152,7 @@ fun QuranScreen(
                             IconButton(
                                 onClick = {
                                     if (searchQuery.isNotBlank()) {
-                                        viewModel.searchQuran(searchQuery)
+
                                         showSearch = false
                                     }
                                 }

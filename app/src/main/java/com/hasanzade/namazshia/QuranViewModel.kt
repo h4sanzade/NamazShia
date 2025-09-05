@@ -21,6 +21,9 @@ class QuranViewModel @Inject constructor(
     private val _surahs = MutableStateFlow<List<Surah>>(emptyList())
     val surahs: StateFlow<List<Surah>> = _surahs.asStateFlow()
 
+    private val _filteredSurahs = MutableStateFlow<List<Surah>>(emptyList())
+    val filteredSurahs: StateFlow<List<Surah>> = _filteredSurahs.asStateFlow()
+
     private val _ayahs = MutableStateFlow<List<Ayah>>(emptyList())
     val ayahs: StateFlow<List<Ayah>> = _ayahs.asStateFlow()
 
@@ -51,6 +54,7 @@ class QuranViewModel @Inject constructor(
                             )
                         }
                         _surahs.value = surahList
+                        _filteredSurahs.value = surahList
                         _state.value = QuranScreenState.SurahList
                     },
                     onFailure = { error ->
@@ -63,18 +67,63 @@ class QuranViewModel @Inject constructor(
         }
     }
 
+    fun searchSurahs(query: String) {
+        if (query.isBlank()) {
+            _filteredSurahs.value = _surahs.value
+            return
+        }
+
+        val searchQuery = query.lowercase().trim()
+        val filtered = _surahs.value.filter { surah ->
+            surah.englishName.lowercase().contains(searchQuery) ||
+                    surah.englishNameTranslation.lowercase().contains(searchQuery) ||
+                    surah.number.toString().contains(searchQuery) ||
+                    matchesCommonTerms(surah, searchQuery)
+        }
+
+        _filteredSurahs.value = filtered
+    }
+
+    private fun matchesCommonTerms(surah: Surah, query: String): Boolean {
+        return when {
+            query.contains("baq") && surah.englishName.lowercase().contains("baqara") -> true
+            query.contains("cow") && surah.englishName.lowercase().contains("baqara") -> true
+
+
+            query.contains("fat") && surah.englishName.lowercase().contains("fatiha") -> true
+            query.contains("open") && surah.englishName.lowercase().contains("fatiha") -> true
+
+            query.contains("imr") && surah.englishName.lowercase().contains("imraan") -> true
+            query.contains("family") && surah.englishNameTranslation.lowercase().contains("family") -> true
+
+            query.contains("nis") && surah.englishName.lowercase().contains("nisa") -> true
+            query.contains("women") && surah.englishNameTranslation.lowercase().contains("women") -> true
+
+            query.contains("mai") && surah.englishName.lowercase().contains("maidah") -> true
+            query.contains("table") && surah.englishNameTranslation.lowercase().contains("table") -> true
+
+            query.contains("yas") && surah.englishName.lowercase().contains("yaseen") -> true
+            query.contains("36") && surah.number == 36 -> true
+
+            query.contains("mul") && surah.englishName.lowercase().contains("mulk") -> true
+            query.contains("kingdom") && surah.englishNameTranslation.lowercase().contains("kingdom") -> true
+
+            query.contains("kah") && surah.englishName.lowercase().contains("kahf") -> true
+            query.contains("cave") && surah.englishNameTranslation.lowercase().contains("cave") -> true
+
+            else -> false
+        }
+    }
+
     fun loadSurahDetail(surah: Surah) {
         viewModelScope.launch {
             try {
                 _isLoadingDetail.value = true
                 _state.value = QuranScreenState.SurahDetail(surah)
 
-                var arabicAyahs: List<Ayah> = emptyList()
-                var translationAyahs: List<QuranTranslation> = emptyList()
-
                 quranRepository.getSurahArabicText(surah.number).fold(
                     onSuccess = { apiAyahs ->
-                        arabicAyahs = apiAyahs.map { apiAyah ->
+                        val arabicAyahs = apiAyahs.map { apiAyah ->
                             Ayah(
                                 number = apiAyah.number,
                                 text = apiAyah.text,
@@ -97,7 +146,7 @@ class QuranViewModel @Inject constructor(
 
                 quranRepository.getSurahTranslation(surah.number).fold(
                     onSuccess = { apiTranslations ->
-                        translationAyahs = apiTranslations.mapIndexed { index, apiTranslation ->
+                        val translationAyahs = apiTranslations.map { apiTranslation ->
                             QuranTranslation(
                                 ayah = apiTranslation.number,
                                 text = apiTranslation.text
@@ -120,7 +169,7 @@ class QuranViewModel @Inject constructor(
         }
     }
 
-    fun searchQuran(query: String) {
+    fun searchInQuranContent(query: String) {
         viewModelScope.launch {
             try {
                 _state.value = QuranScreenState.Loading
@@ -138,6 +187,7 @@ class QuranViewModel @Inject constructor(
 
     fun navigateToSurahList() {
         _state.value = QuranScreenState.SurahList
+        _filteredSurahs.value = _surahs.value
     }
 
     fun navigateToAyah(searchResult: QuranSearchResult) {
