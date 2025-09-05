@@ -54,7 +54,7 @@ class QuranViewModel @Inject constructor(
                         _state.value = QuranScreenState.SurahList
                     },
                     onFailure = { error ->
-                        _state.value = QuranScreenState.Error("Failed to load Surahs from API: ${error.message}")
+                        _state.value = QuranScreenState.Error("Failed to load Surahs: ${error.message}")
                     }
                 )
             } catch (e: Exception) {
@@ -69,10 +69,14 @@ class QuranViewModel @Inject constructor(
                 _isLoadingDetail.value = true
                 _state.value = QuranScreenState.SurahDetail(surah)
 
-                // Load Arabic text from API
+                // Load both Arabic text and translations simultaneously
+                var arabicAyahs: List<Ayah> = emptyList()
+                var translationAyahs: List<QuranTranslation> = emptyList()
+
+                // Load Arabic text
                 quranRepository.getSurahArabicText(surah.number).fold(
                     onSuccess = { apiAyahs ->
-                        val ayahList = apiAyahs.map { apiAyah ->
+                        arabicAyahs = apiAyahs.map { apiAyah ->
                             Ayah(
                                 number = apiAyah.number,
                                 text = apiAyah.text,
@@ -85,7 +89,7 @@ class QuranViewModel @Inject constructor(
                                 sajda = apiAyah.sajda ?: false
                             )
                         }
-                        _ayahs.value = ayahList
+                        _ayahs.value = arabicAyahs
                     },
                     onFailure = { error ->
                         println("Arabic text API error: ${error.message}")
@@ -93,16 +97,16 @@ class QuranViewModel @Inject constructor(
                     }
                 )
 
-                // Load English translation from API
+                // Load English translation
                 quranRepository.getSurahTranslation(surah.number).fold(
                     onSuccess = { apiTranslations ->
-                        val translationList = apiTranslations.map { apiTranslation ->
+                        translationAyahs = apiTranslations.mapIndexed { index, apiTranslation ->
                             QuranTranslation(
                                 ayah = apiTranslation.number,
                                 text = apiTranslation.text
                             )
                         }
-                        _translations.value = translationList
+                        _translations.value = translationAyahs
                     },
                     onFailure = { error ->
                         println("Translation API error: ${error.message}")
@@ -114,7 +118,7 @@ class QuranViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 _isLoadingDetail.value = false
-                _state.value = QuranScreenState.Error("Failed to load Surah details from API: ${e.message}")
+                _state.value = QuranScreenState.Error("Failed to load Surah details: ${e.message}")
             }
         }
     }
@@ -152,54 +156,49 @@ class QuranViewModel @Inject constructor(
         val results = mutableListOf<QuranSearchResult>()
         val queryLower = query.lowercase()
 
-        // Search through first 5 surahs using API only
-        for (surahNumber in 1..5) {
+        // Search through first 10 surahs to avoid too many API calls
+        for (surahNumber in 1..10) {
             try {
                 val surah = _surahs.value.find { it.number == surahNumber }
                 if (surah != null) {
-                    // Get translation from API
+                    // Get both Arabic and translation from API
+                    var arabicTexts: List<String> = emptyList()
+                    var translationTexts: List<String> = emptyList()
+
+                    quranRepository.getSurahArabicText(surahNumber).fold(
+                        onSuccess = { apiAyahs ->
+                            arabicTexts = apiAyahs.map { it.text }
+                        },
+                        onFailure = {
+                            println("Arabic API failed for search in surah $surahNumber")
+                        }
+                    )
+
                     quranRepository.getSurahTranslation(surahNumber).fold(
                         onSuccess = { apiTranslations ->
-                            apiTranslations.forEachIndexed { index, apiTranslation ->
-                                if (apiTranslation.text.lowercase().contains(queryLower)) {
-                                    // Get corresponding Arabic text from API
-                                    quranRepository.getSurahArabicText(surahNumber).fold(
-                                        onSuccess = { apiAyahs ->
-                                            val arabicText = apiAyahs.getOrNull(index)?.text ?: ""
-                                            results.add(
-                                                QuranSearchResult(
-                                                    surahNumber = surahNumber,
-                                                    surahName = surah.englishName,
-                                                    ayahNumber = index + 1,
-                                                    arabicText = arabicText,
-                                                    translation = apiTranslation.text
-                                                )
-                                            )
-                                        },
-                                        onFailure = {
-                                            // Add result without Arabic text if API fails
-                                            results.add(
-                                                QuranSearchResult(
-                                                    surahNumber = surahNumber,
-                                                    surahName = surah.englishName,
-                                                    ayahNumber = index + 1,
-                                                    arabicText = "",
-                                                    translation = apiTranslation.text
-                                                )
-                                            )
-                                        }
+                            translationTexts = apiTranslations.map { it.text }
+
+                            translationTexts.forEachIndexed { index, translation ->
+                                if (translation.lowercase().contains(queryLower)) {
+                                    val arabicText = arabicTexts.getOrNull(index) ?: ""
+                                    results.add(
+                                        QuranSearchResult(
+                                            surahNumber = surahNumber,
+                                            surahName = surah.englishName,
+                                            ayahNumber = index + 1,
+                                            arabicText = arabicText,
+                                            translation = translation
+                                        )
                                     )
                                 }
                             }
                         },
                         onFailure = {
-                            // Skip this surah if translation API fails
-                            println("Translation API failed for surah $surahNumber")
+                            println("Translation API failed for search in surah $surahNumber")
                         }
                     )
                 }
             } catch (e: Exception) {
-                // Continue with next surah if error occurs
                 println("Search error for surah $surahNumber: ${e.message}")
                 continue
             }
