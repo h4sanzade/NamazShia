@@ -69,11 +69,9 @@ class QuranViewModel @Inject constructor(
                 _isLoadingDetail.value = true
                 _state.value = QuranScreenState.SurahDetail(surah)
 
-                // Load both Arabic text and translations simultaneously
                 var arabicAyahs: List<Ayah> = emptyList()
                 var translationAyahs: List<QuranTranslation> = emptyList()
 
-                // Load Arabic text
                 quranRepository.getSurahArabicText(surah.number).fold(
                     onSuccess = { apiAyahs ->
                         arabicAyahs = apiAyahs.map { apiAyah ->
@@ -97,7 +95,6 @@ class QuranViewModel @Inject constructor(
                     }
                 )
 
-                // Load English translation
                 quranRepository.getSurahTranslation(surah.number).fold(
                     onSuccess = { apiTranslations ->
                         translationAyahs = apiTranslations.mapIndexed { index, apiTranslation ->
@@ -156,12 +153,10 @@ class QuranViewModel @Inject constructor(
         val results = mutableListOf<QuranSearchResult>()
         val queryLower = query.lowercase()
 
-        // Search through first 10 surahs to avoid too many API calls
         for (surahNumber in 1..10) {
             try {
                 val surah = _surahs.value.find { it.number == surahNumber }
                 if (surah != null) {
-                    // Get both Arabic and translation from API
                     var arabicTexts: List<String> = emptyList()
                     var translationTexts: List<String> = emptyList()
 
@@ -203,7 +198,6 @@ class QuranViewModel @Inject constructor(
                 continue
             }
 
-            // Limit results for performance
             if (results.size >= 15) break
         }
 

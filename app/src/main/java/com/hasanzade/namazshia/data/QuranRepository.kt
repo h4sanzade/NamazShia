@@ -123,7 +123,6 @@ class QuranRepository @Inject constructor() {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to load surahs: ${e.message}", e)
-            // Return fallback data instead of complete failure
             val fallbackSurahs = getFallbackSurahs()
             Log.d(TAG, "Using fallback data: ${fallbackSurahs.size} surahs")
             Result.success(fallbackSurahs)
@@ -157,13 +156,11 @@ class QuranRepository @Inject constructor() {
                     Result.success(ayahs)
                 } else {
                     Log.e(TAG, "Arabic text API error: ${apiResponse.status}")
-                    // Return fallback Arabic text
                     val fallbackAyahs = getFallbackArabicText(surahNumber)
                     Result.success(fallbackAyahs)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load Arabic text: ${e.message}", e)
-                // Return fallback Arabic text
                 val fallbackAyahs = getFallbackArabicText(surahNumber)
                 Result.success(fallbackAyahs)
             }
@@ -196,13 +193,11 @@ class QuranRepository @Inject constructor() {
                     Result.success(translations)
                 } else {
                     Log.e(TAG, "Translation API error: ${apiResponse.status}")
-                    // Return fallback translation
                     val fallbackTranslations = getFallbackTranslation(surahNumber)
                     Result.success(fallbackTranslations)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load translation: ${e.message}", e)
-                // Return fallback translation
                 val fallbackTranslations = getFallbackTranslation(surahNumber)
                 Result.success(fallbackTranslations)
             }
@@ -244,7 +239,6 @@ class QuranRepository @Inject constructor() {
         }
     }
 
-    // Fallback data methods
     private fun getFallbackSurahs(): List<AlQuranSurah> {
         return listOf(
             AlQuranSurah(1, "سُورَةُ ٱلْفَاتِحَةِ", "Al-Faatiha", "The Opening", 7, "Meccan"),
