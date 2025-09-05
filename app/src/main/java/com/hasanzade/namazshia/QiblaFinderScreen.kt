@@ -32,19 +32,17 @@ fun QiblaFinderScreen(onBackClick: () -> Unit) {
     var deviceRotation by remember { mutableStateOf(0f) }
     var qiblaDirection by remember { mutableStateOf(0f) }
 
-    // Calculate Qibla direction for Baku
     LaunchedEffect(Unit) {
-        qiblaDirection = calculateQiblaDirection(40.4093, 49.8671) // Baku coordinates
+        qiblaDirection = calculateQiblaDirection(40.4093, 49.8671)
     }
 
-    // Simple sensor listener
     DisposableEffect(sensorManager) {
         val magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION)
 
         val sensorEventListener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent?) {
                 if (event?.sensor?.type == Sensor.TYPE_ORIENTATION) {
-                    deviceRotation = event.values[0] // Azimuth
+                    deviceRotation = event.values[0]
                 }
             }
 
@@ -67,7 +65,6 @@ fun QiblaFinderScreen(onBackClick: () -> Unit) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Header
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF2E7D32)),
@@ -96,7 +93,6 @@ fun QiblaFinderScreen(onBackClick: () -> Unit) {
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        // Simple Compass
         Card(
             modifier = Modifier.size(280.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF2D2D2D)),
@@ -107,7 +103,6 @@ fun QiblaFinderScreen(onBackClick: () -> Unit) {
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                // North indicator (top)
                 Text(
                     text = "N",
                     color = Color.Red,
@@ -118,7 +113,6 @@ fun QiblaFinderScreen(onBackClick: () -> Unit) {
                         .rotate(-deviceRotation)
                 )
 
-                // Qibla direction arrow
                 Icon(
                     imageVector = Icons.Default.Navigation,
                     contentDescription = "Qibla Direction",
@@ -128,14 +122,12 @@ fun QiblaFinderScreen(onBackClick: () -> Unit) {
                         .rotate(qiblaDirection - deviceRotation)
                 )
 
-                // Center circle
                 Box(
                     modifier = Modifier
                         .size(20.dp)
                         .background(Color.White, CircleShape)
                 )
 
-                // Compass directions
                 Text(
                     text = "E",
                     color = Color.White,
@@ -165,7 +157,6 @@ fun QiblaFinderScreen(onBackClick: () -> Unit) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Instructions
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF2D2D2D)),
@@ -201,7 +192,6 @@ fun QiblaFinderScreen(onBackClick: () -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Direction info
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
@@ -234,7 +224,6 @@ fun QiblaFinderScreen(onBackClick: () -> Unit) {
     }
 }
 
-// Simple Qibla calculation
 fun calculateQiblaDirection(latitude: Double, longitude: Double): Float {
     val kaabaLat = Math.toRadians(21.4225) // Mecca
     val kaabaLng = Math.toRadians(39.8262)

@@ -35,7 +35,7 @@ data class Prayer(
 
 data class LocationInfo(
     val city: String,
-    val latitude: Double = 40.4093, // Baku coordinates
+    val latitude: Double = 40.4093,
     val longitude: Double = 49.8671
 )
 

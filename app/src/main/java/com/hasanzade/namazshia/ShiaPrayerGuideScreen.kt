@@ -459,7 +459,6 @@ O Allah, send blessings upon Muhammad and the family of Muhammad."""
         }
     }
 
-    // Final Tashahhud and Salawat
     steps.add(
         ShiaPrayerStep(
             step = "FINAL TASHAHHUD",
@@ -483,7 +482,6 @@ O Allah, send blessings upon Muhammad and the family of Muhammad."""
         )
     )
 
-    // Salams (Greetings)
     steps.add(
         ShiaPrayerStep(
             step = "SALAMS",

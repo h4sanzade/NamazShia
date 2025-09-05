@@ -39,7 +39,6 @@ fun TasbeehScreen(onBackClick: () -> Unit) {
     val context = LocalContext.current
     val dataRepository = remember { com.hasanzade.namazshia.data.QazaDataRepository(context) }
 
-    // Load saved state
     val savedState = remember { dataRepository.getTasbeehState() }
     var currentPhase by remember { mutableStateOf(savedState.first) }
     var currentCount by remember { mutableStateOf(savedState.second) }
@@ -67,7 +66,6 @@ fun TasbeehScreen(onBackClick: () -> Unit) {
         )
     )
 
-    // Animation for button press
     var buttonPressed by remember { mutableStateOf(false) }
     val buttonScale by animateFloatAsState(
         targetValue = if (buttonPressed) 0.95f else 1f,
@@ -89,21 +87,17 @@ fun TasbeehScreen(onBackClick: () -> Unit) {
             currentCount++
 
             if (currentCount == currentPhaseData.targetCount) {
-                // Move to next phase or complete
                 if (currentPhase < phases.size - 1) {
                     currentPhase++
                     currentCount = 0
                 } else {
-                    // Completed all phases
                     showCompletion = true
                 }
             }
         }
 
-        // Save current state
         dataRepository.saveTasbeehState(currentPhase, currentCount, showCompletion)
 
-        // Reset button animation
         kotlinx.coroutines.GlobalScope.launch {
             kotlinx.coroutines.delay(100)
             buttonPressed = false
@@ -125,7 +119,6 @@ fun TasbeehScreen(onBackClick: () -> Unit) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Top Navigation Bar
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF2E7D32)),
@@ -166,7 +159,6 @@ fun TasbeehScreen(onBackClick: () -> Unit) {
                 }
             }
 
-            // Main Content
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -175,17 +167,14 @@ fun TasbeehScreen(onBackClick: () -> Unit) {
                 verticalArrangement = Arrangement.Center
             ) {
                 if (showCompletion) {
-                    // Completion Message
                     CompletionMessage(onReset = { resetTasbeeh() })
                 } else {
                     val currentPhaseData = phases[currentPhase]
 
-                    // Progress Indicator
                     ProgressIndicator(currentPhase = currentPhase, totalPhases = phases.size)
 
                     Spacer(modifier = Modifier.height(40.dp))
 
-                    // Arabic Text
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFF2D2D2D)),
@@ -226,7 +215,6 @@ fun TasbeehScreen(onBackClick: () -> Unit) {
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // Counter Display
                     CounterDisplay(
                         currentCount = currentCount,
                         targetCount = currentPhaseData.targetCount,
@@ -235,7 +223,6 @@ fun TasbeehScreen(onBackClick: () -> Unit) {
 
                     Spacer(modifier = Modifier.height(40.dp))
 
-                    // Plus Button
                     FloatingActionButton(
                         onClick = { incrementCount() },
                         modifier = Modifier
@@ -254,7 +241,6 @@ fun TasbeehScreen(onBackClick: () -> Unit) {
             }
         }
 
-        // Info Dialog
         if (showInfo) {
             InfoDialog(onDismiss = { showInfo = false })
         }
@@ -410,7 +396,6 @@ fun InfoDialog(onDismiss: () -> Unit) {
                     .verticalScroll(rememberScrollState())
                     .padding(20.dp)
             ) {
-                // Header with close button
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,

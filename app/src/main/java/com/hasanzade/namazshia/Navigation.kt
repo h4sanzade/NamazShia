@@ -44,10 +44,10 @@ fun NamazShiaNavigation() {
                 PrayerTimesScreen()
             }
             composable("pray") {
-                PrayScreen() // Updated to use the new PrayScreen
+                PrayScreen()
             }
             composable("learn") {
-                PlaceholderScreen(title = "Learn")
+                QuranScreen()
             }
             composable("more") {
                 PlaceholderScreen(title = "More")
@@ -61,7 +61,7 @@ fun BottomNavigationBar(navController: NavController) {
     val items = listOf(
         BottomNavItem("prayer_times", "Prayer Times", Icons.Default.Schedule),
         BottomNavItem("pray", "Pray", Icons.Default.Mosque),
-        BottomNavItem("learn", "Learn", Icons.Default.MenuBook),
+        BottomNavItem("learn", "Quran", Icons.Default.MenuBook), // Changed label from "Learn" to "Quran"
         BottomNavItem("more", "More", Icons.Default.MoreHoriz)
     )
 

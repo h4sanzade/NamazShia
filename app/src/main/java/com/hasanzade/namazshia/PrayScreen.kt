@@ -60,7 +60,7 @@ fun PrayScreen() {
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp)
             ) {
-                // Header
+
                 Text(
                     text = "Pray",
                     color = Color.White,
@@ -69,21 +69,21 @@ fun PrayScreen() {
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
-                // Prayer List Section
+
                 PrayerListCard { prayer, rakah ->
                     selectedPrayer = Pair(prayer, rakah)
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Extra Menu Section
+
                 ExtraMenuCard(
                     onQiblaFinderClick = { showQiblaFinder = true },
                     onTasbeehClick = { showTasbeeh = true },
                     onQazaTrackerClick = { showQazaTracker = true }
                 )
 
-                // Bottom spacing for navigation bar
+
                 Spacer(modifier = Modifier.height(80.dp))
             }
         }
@@ -205,7 +205,6 @@ fun ExtraMenuCard(
                     onClick = item.onClick
                 )
 
-                // Add divider between items except for the last one
                 if (index < menuItems.size - 1) {
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
@@ -259,7 +258,6 @@ fun ExtraMenuListItem(
     }
 }
 
-// Data classes
 data class PrayerItem(
     val name: String,
     val rakah: String,

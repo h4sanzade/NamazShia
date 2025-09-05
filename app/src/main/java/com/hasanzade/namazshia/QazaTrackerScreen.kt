@@ -41,7 +41,6 @@ fun QazaTrackerScreen(onBackClick: () -> Unit) {
     var showAutoCalculation by remember { mutableStateOf(false) }
     var showCountDialog by remember { mutableStateOf<String?>(null) }
 
-    // Load saved data on startup
     var qazaPrayers by remember {
         mutableStateOf(
             listOf(
@@ -55,7 +54,6 @@ fun QazaTrackerScreen(onBackClick: () -> Unit) {
         )
     }
 
-    // Load saved safar data
     var safarPrayers by remember {
         mutableStateOf(
             listOf(
@@ -89,7 +87,7 @@ fun QazaTrackerScreen(onBackClick: () -> Unit) {
     fun setAutoCalculatedCounts(
         fajr: Int, dhuhr: Int, asr: Int, maghrib: Int, isha: Int, ramadan: Int
     ) {
-        // Save to repository
+
         dataRepository.saveQazaPrayerCount("Fajr", fajr)
         dataRepository.saveQazaPrayerCount("Dhuhr", dhuhr)
         dataRepository.saveQazaPrayerCount("Asr", asr)
@@ -97,7 +95,7 @@ fun QazaTrackerScreen(onBackClick: () -> Unit) {
         dataRepository.saveQazaPrayerCount("Isha", isha)
         dataRepository.saveQazaPrayerCount("Ramadan", ramadan)
 
-        // Update UI
+
         qazaPrayers = listOf(
             QazaPrayer("Fajr", Icons.Default.WbTwilight, fajr),
             QazaPrayer("Dhuhr", Icons.Default.LightMode, dhuhr),
@@ -125,14 +123,14 @@ fun QazaTrackerScreen(onBackClick: () -> Unit) {
                     .fillMaxSize()
                     .background(Color.Black)
             ) {
-                // Top App Bar
+
                 QazaTopAppBar(
                     onBackClick = onBackClick,
                     onResetClick = { resetAllData() },
                     onAutoCalculationClick = { showAutoCalculation = true }
                 )
 
-                // Tab Layout
+
                 TabRow(
                     selectedTabIndex = selectedTab,
                     containerColor = Color(0xFF2D2D2D),
@@ -166,7 +164,7 @@ fun QazaTrackerScreen(onBackClick: () -> Unit) {
                     )
                 }
 
-                // Tab Content
+
                 when (selectedTab) {
                     0 -> QazaTab(
                         prayers = qazaPrayers,
@@ -179,7 +177,7 @@ fun QazaTrackerScreen(onBackClick: () -> Unit) {
                 }
             }
 
-            // Count Dialog
+
             showCountDialog?.let { prayerName ->
                 val currentPrayer = if (selectedTab == 0) {
                     qazaPrayers.find { it.name == prayerName }

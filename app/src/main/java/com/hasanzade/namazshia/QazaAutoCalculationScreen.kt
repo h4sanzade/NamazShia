@@ -32,7 +32,6 @@ fun QazaAutoCalculationScreen(
     val context = LocalContext.current
     val dataRepository = remember { com.hasanzade.namazshia.data.QazaDataRepository(context) }
 
-    // Load saved data
     val savedData = remember { dataRepository.getAutoCalculationData() }
     var selectedGender by remember { mutableStateOf(savedData.first) }
     var birthDate by remember { mutableStateOf(
@@ -80,18 +79,17 @@ fun QazaAutoCalculationScreen(
 
         try {
             val daysDifference = ChronoUnit.DAYS.between(startDate, today)
-            val totalPrayers = (daysDifference * 5).toInt() // 5 prayers per day
+            val totalPrayers = (daysDifference * 5).toInt()
 
-            // Split equally among prayers (except Ramadan which stays 0)
             val eachPrayerCount = totalPrayers / 5
-            val remainingPrayers = totalPrayers % 5 // Distribute remainder to first prayers
+            val remainingPrayers = totalPrayers % 5
 
             val fajr = eachPrayerCount + if (remainingPrayers > 0) 1 else 0
             val dhuhr = eachPrayerCount + if (remainingPrayers > 1) 1 else 0
             val asr = eachPrayerCount + if (remainingPrayers > 2) 1 else 0
             val maghrib = eachPrayerCount + if (remainingPrayers > 3) 1 else 0
             val isha = eachPrayerCount + if (remainingPrayers > 4) 1 else 0
-            val ramadan = 0 // User can manually set this
+            val ramadan = 0
 
             calculatedResults = mapOf(
                 "Fajr" to fajr,
@@ -119,7 +117,7 @@ fun QazaAutoCalculationScreen(
             val calculatedStart = birth.plusYears(ageToAdd.toLong())
             prayerStartDate = calculatedStart
 
-            // Save the updated data
+
             dataRepository.saveAutoCalculationData(
                 selectedGender,
                 birth.toString(),
@@ -134,7 +132,7 @@ fun QazaAutoCalculationScreen(
             .background(Color.Black)
             .verticalScroll(rememberScrollState())
     ) {
-        // Top App Bar
+
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF2E7D32)),
@@ -168,7 +166,7 @@ fun QazaAutoCalculationScreen(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Instructions
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF2D2D2D)),
@@ -231,7 +229,7 @@ fun QazaAutoCalculationScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Birth Date
+
             DatePickerField(
                 label = "Birth Date",
                 selectedDate = birthDate,
@@ -281,7 +279,7 @@ fun QazaAutoCalculationScreen(
                 Text("Calculate Qaza Prayers", fontSize = 16.sp)
             }
 
-            // Results
+
             calculatedResults?.let { results ->
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -467,7 +465,7 @@ fun SimpleDatePickerDialog(
             TextButton(
                 onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        // Convert millis to LocalDate correctly
+
                         val date = java.time.Instant.ofEpochMilli(millis)
                             .atZone(java.time.ZoneId.systemDefault())
                             .toLocalDate()
